@@ -23,10 +23,10 @@ namespace TesteApiNava.Controllers
         {
             return _context.venda.ToList();
         }
-        [HttpGet("{id}", Name ="ObterVenda")]
+        [HttpGet("{id}", Name = "ObterVenda")]
         public ActionResult<Venda> GetResult(int id)
         {
-            var venda = _context.venda.FirstOrDefault(v=> v.Id == id);
+            var venda = _context.venda.FirstOrDefault(v => v.Id == id);
             if (venda == null)
                 return NotFound();
             return venda;
@@ -44,16 +44,16 @@ namespace TesteApiNava.Controllers
             _context.Add(venda);
             _context.SaveChanges();
             return new CreatedAtRouteResult("ObterVenda",
-                new { Identificador = venda.Id },venda);
+                new { Identificador = venda.Id }, venda);
         }
         [HttpPut("{id}")]
-        public  ActionResult Put(int id, [FromBody] string status)
+        public ActionResult Put(int id, [FromBody] string status)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var venda = _context.venda.FirstOrDefault(v=> v.Id == id);
+            var venda = _context.venda.FirstOrDefault(v => v.Id == id);
 
             if (venda == null)
             {
@@ -62,12 +62,13 @@ namespace TesteApiNava.Controllers
 
             if (venda.Status == "Aguardando pagamento")
             {
-                if (status== "Pagamento Aprovado" || status == "Cancelada")
+                if (status == "Pagamento Aprovado" || status == "Cancelada")
                 {
                     venda.Status = status;
                     _context.Update(venda);
                 }
             }
+            else
             if (venda.Status == "Pagamento Aprovado")
             {
                 if (status == "Enviado para Transportador" || status == "Cancelada")
@@ -76,6 +77,7 @@ namespace TesteApiNava.Controllers
                     _context.Update(venda);
                 }
             }
+            else
             if (venda.Status == "Enviado para Transportador")
             {
                 if (status == "Entregue")
@@ -84,6 +86,9 @@ namespace TesteApiNava.Controllers
                     _context.Update(venda);
                 }
             }
+
+            else
+                return NotFound();
             _context.SaveChanges();
             return Ok(venda);
 
