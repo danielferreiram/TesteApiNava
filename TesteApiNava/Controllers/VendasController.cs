@@ -21,14 +21,24 @@ namespace TesteApiNava.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Venda>> GetActionResult()
         {
-            return _context.venda.ToList();
+            var venda = _context.venda.ToList();
+            if (venda != null)
+            {
+                foreach (var item in venda)
+                {
+                    item.Vendedor = _context.vendedor.FirstOrDefault(v => v.Id == item.VendedorId);
+                }
+            }
+            return venda;
         }
         [HttpGet("{id}", Name = "ObterVenda")]
         public ActionResult<Venda> GetResult(int id)
         {
-            var venda = _context.venda.FirstOrDefault(v => v.Id == id);
+            var venda = _context.venda.FirstOrDefault(v => v.IdentificadorVenda == id);
             if (venda == null)
                 return NotFound();
+            venda.Vendedor = _context.vendedor.FirstOrDefault(v => v.Id == venda.VendedorId);
+
             return venda;
         }
         [HttpPost]
@@ -38,13 +48,17 @@ namespace TesteApiNava.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            venda.Vendedor = _context.vendedor.FirstOrDefault(v => v.Id == venda.VendedorId);
+            if (venda.Vendedor == null)
+            {
+                return NotFound("Vendedor não encontrado.");
+            }
             venda.DataVenda = DateTime.Now;
             venda.Status = "Aguardando pagamento";
             _context.Add(venda);
             _context.SaveChanges();
             return new CreatedAtRouteResult("ObterVenda",
-                new { Identificador = venda.Id }, venda);
+                new { Identificador = venda.IdentificadorVenda }, venda);
         }
         [HttpPut("{id}")]
         public ActionResult Put(int id, [FromBody] string status)
@@ -53,34 +67,34 @@ namespace TesteApiNava.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var venda = _context.venda.FirstOrDefault(v => v.Id == id);
+            var venda = _context.venda.FirstOrDefault(v => v.IdentificadorVenda == id);
 
             if (venda == null)
             {
                 return NotFound();
             }
 
-            if (venda.Status == "Aguardando pagamento")
+            if (venda.Status.ToUpper() == "AGUARDANDO PAGAMENTO")
             {
-                if (status == "Pagamento Aprovado" || status == "Cancelada")
+                if (status.ToUpper() == "PAGAMENTO APROVADO" || status.ToUpper() == "CANCELADA")
                 {
                     venda.Status = status;
                     _context.Update(venda);
                 }
             }
             else
-            if (venda.Status == "Pagamento Aprovado")
+            if (venda.Status.ToUpper() == "PAGAMENTO APROVADO")
             {
-                if (status == "Enviado para Transportador" || status == "Cancelada")
+                if (status.ToUpper() == "ENVIADO PARA TRANSPORTADOR" || status.ToUpper() == "CANCELADA")
                 {
                     venda.Status = status;
                     _context.Update(venda);
                 }
             }
             else
-            if (venda.Status == "Enviado para Transportador")
+            if (venda.Status.ToUpper() == "ENVIADO PARA TRANSPORTADOR")
             {
-                if (status == "Entregue")
+                if (status.ToUpper() == "ENTREGUE")
                 {
                     venda.Status = status;
                     _context.Update(venda);

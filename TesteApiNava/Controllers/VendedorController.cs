@@ -25,7 +25,7 @@ namespace TesteApiNava.Controllers
         [HttpGet("{id}", Name = "ObterVendedor")]
         public ActionResult<Vendedor> GetResult(int id)
         {
-            var vendedor = _context.vendedor.FirstOrDefault(v => v.vendedorId == id);
+            var vendedor = _context.vendedor.FirstOrDefault(v => v.Id == id);
             if (vendedor == null)
                 return NotFound();
             return vendedor;
@@ -41,7 +41,7 @@ namespace TesteApiNava.Controllers
            _context.Add(vendedor);
             _context.SaveChanges();
             return new CreatedAtRouteResult("ObterVenda",
-                new { id = vendedor.vendedorId }, vendedor);
+                new { id = vendedor.Id }, vendedor);
         }
       
       
